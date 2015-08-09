@@ -150,9 +150,9 @@ avr-objcopy -O ihex -R .eeprom {FILE LOC}.elf {FILE LOC}.hex
                 }
               });
           }
-      
-      return;
-    }
+        })
+      }
+    });
       res.set('Content-Type', 'text/plain');
       res.send(500, 'error');
       return;
@@ -198,7 +198,7 @@ avr-objcopy -O ihex -R .eeprom {FILE LOC}.elf {FILE LOC}.hex
 
   
   //.on('end', cleanUp),
-});
+// });
 
 
 //   var options = {
