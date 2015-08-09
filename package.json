@@ -1,0 +1,9 @@
+{
+  "name": "Tunahack",
+  "description": "Hola",
+  "version": "1.0.0",
+  "dependencies": {
+    "body-parser": "^1.10.2",
+    "express": "^3.19.1"
+  }
+}
