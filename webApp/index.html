@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <title>IDE</title>
+
+    <script src="script.js" type="text/javascript" ></script>
+
+  <style>
+    body {
+        width: 500px;
+        height: 400px;
+        margin: 0;
+        padding: 0;
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+        overflow: none;
+        background-color: rgb(0,0,0);
+        color: white;
+      }
+    #editor { 
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+  </style>
+
+  </head>
+
+  <body>
+    <div>
+    <h1>Briko</h1>
+    <h2>¡Edita, compila y carga tu c&oacute;digo desde el navegador!</h2>
+    <button style="bottom:20px;" id="compile"> Compilar y cargar c&oacute;digo al briko</button>
+    <br>
+    <br>
+</div>
+  <br>
+<div>
+  <pre style="top:30%; height:100%" id="editor">ledsbk leds(PORT1);     //Declara el modulo de leds en el puerto 1
+
+//Codigo principal que corre por siempre
+code(){
+
+leds.color(1,WHITE);      //Prende el primer led de color blanco
+leds.brightness(255);     //Cambia la intensidad del led a 255
+delay(1000);              //Espera 1000 milisegundos
+leds.brightness(100);     //Cambia la intensidad del led a 100
+delay(1000);              //Espera 1000 milisegundos
+
+}</pre>
+
+</div>
+    
+<script src="/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+
+</script>
+
+  </body>
+</html>
