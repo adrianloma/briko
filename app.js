@@ -57,52 +57,19 @@ app.use(express.static(path.join(__dirname, 'webApp')));
 // });
 
 var step4Compile = function(){
-  var gcc = spawn('avr-objcopy', ['-O ihex -R .eeprom', __dirname + '/public/a.out.elf', __dirname + '/public/a.hex']);
-  gcc.stderr.on('data', function (data) {
-    console.log('stderr: ' + data);
-  });
-  gcc.on('close', function (code) {
-    //console.log('child process exited with code ' + code);
-    if(code == 0){
-      return true;
-    } else{
-      return false;
-    }
-  });
+  
 
 }
 
 
 var step3Compile = function(){
-  var gcc = spawn('avr-objcopy', [ '-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0',  __dirname + '/public/a.out.elf',  __dirname + '/public/a.out.eep']);
-  gcc.stderr.on('data', function (data) {
-    console.log('stderr: ' + data);
-  });
-  gcc.on('close', function (code) {
-    //console.log('child process exited with code ' + code);
-    if(code == 0){
-      return(step4Compile());
-    } else{
-      return false;
-    }
-  });
+
 
 }
 
 
 var step2Compile = function(){
-  var gcc = spawn('avr-g++', [ '-w -Os -Wl,--gc-sections -mmcu=atmega32u4', '-o ', __dirname + '/public/a.out.elf', __dirname + '/public/a.out', __dirname + '/tmp/core/core.a -Ltmp -lm']);
-  gcc.stderr.on('data', function (data) {
-    console.log('stderr: ' + data);
-  });
-  gcc.on('close', function (code) {
-    //console.log('child process exited with code ' + code);
-    if(code == 0){
-      return(step3Compile());
-    } else{
-      return false;
-    }
-  });
+
 
 }
 
@@ -154,15 +121,42 @@ avr-objcopy -O ihex -R .eeprom {FILE LOC}.elf {FILE LOC}.hex
   });
   gcc.on('close', function (code) {
     //console.log('child process exited with code ' + code);
-    if(code == 0 && step2Compile()){
-      send(req, 'public/a.hex').pipe(res);
-    } else{
+    if(code == 0){
+        var gcc2 = spawn('avr-g++', [ '-w -Os -Wl,--gc-sections -mmcu=atmega32u4', '-o ', __dirname + '/public/a.out.elf', __dirname + '/public/a.out', __dirname + '/tmp/core/core.a -Ltmp -lm']);
+        gcc2.stderr.on('data', function (data) {
+          console.log('stderr: ' + data);
+        });
+        gcc2.on('close', function (code) {
+          //console.log('child process exited with code ' + code);
+          if(code == 0){
+              var gcc3 = spawn('avr-objcopy', [ '-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0',  __dirname + '/public/a.out.elf',  __dirname + '/public/a.out.eep']);
+              gcc3.stderr.on('data', function (data) {
+                console.log('stderr: ' + data);
+              });
+              gcc3.on('close', function (code) {
+                //console.log('child process exited with code ' + code);
+                if(code == 0){
+                  var gcc4 = spawn('avr-objcopy', ['-O ihex -R .eeprom', __dirname + '/public/a.out.elf', __dirname + '/public/a.hex']);
+                  gcc4.stderr.on('data', function (data) {
+                    console.log('stderr: ' + data);
+                  });
+                  gcc4.on('close', function (code) {
+                    //console.log('child process exited with code ' + code);
+                    if(code == 0){
+                      send(req, 'public/a.hex').pipe(res);
+                      return;
+                    }
+                  });
+                }
+              });
+          }
+      
+      return;
+    }
       res.set('Content-Type', 'text/plain');
-      // util = require("util");
-      // var obj_str = util.inspect(res);
-      // console.log(obj_str);
       res.send(500, 'error');
-    }});
+      return;
+    });
 
   // gcc = spawn('avr-g++', [__dirname + '/p1.c', flags1, flags2,  '-o', __dirname + '/public/a.out']);
   // gcc.stderr.on('data', function (data) {
