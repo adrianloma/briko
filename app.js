@@ -68,6 +68,7 @@ var step4Compile = function(){
     } else{
       return false;
     }
+  });
 
 }
 
@@ -84,6 +85,7 @@ var step3Compile = function(){
     } else{
       return false;
     }
+  });
 
 }
 
@@ -100,6 +102,7 @@ var step2Compile = function(){
     } else{
       return false;
     }
+  });
 
 }
 
