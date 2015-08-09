@@ -56,6 +56,53 @@ app.use(express.static(path.join(__dirname, 'webApp')));
 //   res.json(true);
 // });
 
+var step4Compile = function(){
+  gcc = spawn('avr-objcopy', ['-O ihex -R .eeprom', __dirname + '/public/a.out.elf', __dirname + '/public/a.hex']);
+  gcc.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+  });
+  gcc.on('close', function (code) {
+    //console.log('child process exited with code ' + code);
+    if(code == 0){
+      return true;
+    } else{
+      return false;
+    }
+
+}
+
+
+var step3Compile = function(){
+  gcc = spawn('avr-objcopy', [ '-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0',  __dirname + '/public/a.out.elf',  __dirname + '/public/a.out.eep']);
+  gcc.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+  });
+  gcc.on('close', function (code) {
+    //console.log('child process exited with code ' + code);
+    if(code == 0){
+      return(step4Compile());
+    } else{
+      return false;
+    }
+
+}
+
+
+var step2Compile = function(){
+  gcc = spawn('avr-g++', [ '-w -Os -Wl,--gc-sections -mmcu=atmega32u4', '-o ', __dirname + '/public/a.out.elf', __dirname + '/public/a.out', __dirname + '/tmp/core/core.a -Ltmp -lm']);
+  gcc.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+  });
+  gcc.on('close', function (code) {
+    //console.log('child process exited with code ' + code);
+    if(code == 0){
+      return(step3Compile());
+    } else{
+      return false;
+    }
+
+}
+
 
 
 app.get('/', function(req, res){
@@ -83,15 +130,29 @@ app.post('/compile', function(req, res) {
     });
 //   //console.log(req.text);
 
-  gcc = spawn('gcc', ['-o', __dirname + '/public/a.out', __dirname + '/p1.c']);
+
+/*
+avr-g++  {FILE LOC} -o {FILE LOC}.o
+
+
+avr-gcc -w -Os -Wl,--gc-sections -mmcu=atmega32u4 -o {FILE LOC}.elf {FILE LOC}.o tmp/core/core.a -Ltmp -lm 
+
+avr-objcopy -O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 {FILE LOC}.elf {FILE LOC}.eep 
+avr-objcopy -O ihex -R .eeprom {FILE LOC}.elf {FILE LOC}.hex 
+
+
+*/
+
+  var flags1 = '-c -g -Os -w -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics -MMD -mmcu=atmega32u4 -DF_CPU=16000000L -DARDUINO=10000 -DARDUINO_AVR_LEONARDO -DARDUINO_ARCH_AVR -DUSB_VID=0x2341 -DUSB_PID=0x8036 -DUSB_MANUFACTURER="Unknown" -DUSB_PRODUCT="Arduino Leonardo"';
+  flags2 = "-I" + __dirname + "/sourceCompiler/cores/arduino -I" + __dirname + "/sourceCompiler/leonardo ";
+  gcc = spawn('avr-g++', [__dirname + '/p1.c', flags1, flags2,  '-o', __dirname + '/public/a.out']);
   gcc.stderr.on('data', function (data) {
     console.log('stderr: ' + data);
   });
-
   gcc.on('close', function (code) {
-    console.log('child process exited with code ' + code);
-    if(code == 0){
-      send(req, 'public/a.out').pipe(res);
+    //console.log('child process exited with code ' + code);
+    if(code == 0 && step2Compile()){
+      send(req, 'public/a.hex').pipe(res);
     } else{
       res.set('Content-Type', 'text/plain');
       // util = require("util");
@@ -99,8 +160,25 @@ app.post('/compile', function(req, res) {
       // console.log(obj_str);
       res.send(500, 'error');
     }
+
+  // gcc = spawn('avr-g++', [__dirname + '/p1.c', flags1, flags2,  '-o', __dirname + '/public/a.out']);
+  // gcc.stderr.on('data', function (data) {
+  //   console.log('stderr: ' + data);
+  // });
+
+  // gcc.on('close', function (code) {
+  //   console.log('child process exited with code ' + code);
+  //   if(code == 0){
+  //     send(req, 'public/a.out').pipe(res);
+  //   } else{
+  //     res.set('Content-Type', 'text/plain');
+  //     // util = require("util");
+  //     // var obj_str = util.inspect(res);
+  //     // console.log(obj_str);
+  //     res.send(500, 'error');
+  //   }
     
-  });
+  // });
   // fs.readFile('public/a.out', 'utf8', 
   //   function(err,data){
   //     if(err) {
