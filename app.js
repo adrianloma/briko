@@ -162,7 +162,7 @@ avr-objcopy -O ihex -R .eeprom {FILE LOC}.elf {FILE LOC}.hex
       // var obj_str = util.inspect(res);
       // console.log(obj_str);
       res.send(500, 'error');
-    }
+    }});
 
   // gcc = spawn('avr-g++', [__dirname + '/p1.c', flags1, flags2,  '-o', __dirname + '/public/a.out']);
   // gcc.stderr.on('data', function (data) {
